@@ -17,7 +17,14 @@ go build .
 go run .
 ```
 
-## Customize
+## Configuration
+
+| Environment variable | Description                                   | Default                   |
+|----------------------|-----------------------------------------------|---------------------------|
+| LANDING_TEMPLATE     | The path to the html template                 | templates/index.html.tmpl |
+| LANDING_TITLE        | The title displayed on the landing page       | go-landing                |
+| LANDING_DESCRIPTION  | The description displayed on the landing page | powered by //go:embed     |
+
 ```bash
 export LANDING_TEMPLATE='templates/index.html.tmpl'
 export LANDING_TITLE='go-landing'
