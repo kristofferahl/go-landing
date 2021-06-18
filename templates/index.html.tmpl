@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <title>{{ .Title }}</title>
+    <style media="screen">
+      body {
+        margin: 0;
+        font-family: 'Open Sans', sans-serif;
+      }
+      main {
+        margin: 2vh;
+        min-height: 96vh;
+        background-color: #0095ff;
+        background-image:
+          linear-gradient(
+            to bottom right,
+            #0095ff, #00ff72
+          );
+      }
+      .content {
+        padding-top: 35vh;
+        text-align: center;
+        color: white;
+      }
+      h1 {
+        font-size: 4em;
+        margin: .2em;
+      }
+      p {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="content">
+        <img src="/static/go-landing.png" width="180" height="193" alt="go-landing logo" />
+        <h1>{{ .Title }}</h1>
+        <p>{{ .Description }}</p>
+      </div>
+    </main>
+  </body>
+</html>
