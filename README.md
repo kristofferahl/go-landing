@@ -4,11 +4,7 @@ A minimalistic, templated landing page web server written in go.
 
 ![go-landing screenshot](screenshot.png)
 
-[![Docker Automated build](https://img.shields.io/docker/cloud/automated/kristofferahl/go-landing.svg?style=for-the-badge)](https://hub.docker.com/r/kristofferahl/go-landing/)
-[![Docker Build Status](https://img.shields.io/docker/cloud/build/kristofferahl/go-landing.svg?style=for-the-badge)](https://hub.docker.com/r/kristofferahl/go-landing/)
-[![MicroBadger Size](https://img.shields.io/microbadger/image-size/kristofferahl/go-landing.svg?style=for-the-badge)](https://hub.docker.com/r/kristofferahl/go-landing/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/kristofferahl/go-landing.svg?style=for-the-badge)](https://hub.docker.com/r/kristofferahl/go-landing/)
-
+[![Docker Build Status](https://img.shields.io/docker/cloud/build/kristofferahl/go-landing.svg?style=for-the-badge)](https://hub.docker.com/r/kristofferahl/go-landing/) [![Docker Pulls](https://img.shields.io/docker/pulls/kristofferahl/go-landing.svg?style=for-the-badge)](https://hub.docker.com/r/kristofferahl/go-landing/)
 
 ## Build
 
@@ -41,6 +37,7 @@ export LANDING_LINKS='[Github](https://github.com/kristofferahl/go-landing);[Doc
 ```
 
 ## Running in docker
+
 ```bash
 docker build -t kristofferahl/go-landing:v1.1.0 --platform linux/amd64 .
 docker run --rm -p 9000:9000 \
