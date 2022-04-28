@@ -28,6 +28,16 @@
       p {
         font-weight: bold;
       }
+      a {
+        color: #005a9a;
+      }
+      ul {
+        margin: 1em 0;
+        padding: 0;
+      }
+      li {
+        padding: .25em 0;
+      }
     </style>
   </head>
   <body>
@@ -35,6 +45,13 @@
       <div class="content">
         <img src="/static/go-landing.png" width="180" height="193" alt="go-landing logo" />
         <h1>{{ .Title }}</h1>
+        {{ $length := len .Links }}{{ if gt $length 0 }}
+        <ul>
+        {{range $link := .Links }}
+            <li><a href="{{ $link.Url }}">{{ $link.Title }}</a></li>
+        {{ end }}
+        </ul>
+        {{ end }}
         <p>{{ .Description }}</p>
       </div>
     </main>
