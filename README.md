@@ -4,7 +4,7 @@ A minimalistic, templated landing page web server written in go.
 
 ![go-landing screenshot](screenshot.png)
 
-[![Docker Build Status](https://img.shields.io/docker/cloud/build/kristofferahl/go-landing.svg?style=for-the-badge)](https://hub.docker.com/r/kristofferahl/go-landing/) [![Docker Pulls](https://img.shields.io/docker/pulls/kristofferahl/go-landing.svg?style=for-the-badge)](https://hub.docker.com/r/kristofferahl/go-landing/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/kristofferahl/go-landing.svg?style=for-the-badge)](https://hub.docker.com/r/kristofferahl/go-landing/)
 
 ## Build
 
