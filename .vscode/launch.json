@@ -10,9 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/main.go",
-            "env": {
-                "LANDING_LINKS": "[Github](https://github.com/kristofferahl/go-landing);[Docher Hub](https://hub.docker.com/r/kristofferahl/go-landing)",
-            }
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

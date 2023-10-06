@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine as builder
+FROM golang:1.19-alpine as builder
 COPY . $GOPATH/work/
 WORKDIR $GOPATH/work/
 RUN go get -d -v
