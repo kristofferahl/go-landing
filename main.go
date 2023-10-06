@@ -10,6 +10,12 @@ import (
 	"strings"
 )
 
+const (
+	DefaultServerName string = "go-landing"
+	ConditionTrue     string = "true"
+	ConditionFalse    string = "false"
+)
+
 func environmentOrDefault(key string, defaultValue string) string {
 	value := os.Getenv(key)
 	if value == "" {
@@ -53,13 +59,45 @@ func getParams(regex *regexp.Regexp, s string) (params map[string]string) {
 	return params
 }
 
+func trimEmpty(slice []string) []string {
+	var r []string
+	for _, s := range slice {
+		if s != "" {
+			r = append(r, s)
+		}
+	}
+	return r
+}
+
+type GoLandingWriter struct {
+	http.ResponseWriter
+	Status int
+}
+
+func (r *GoLandingWriter) WriteHeader(status int) {
+	if r.Status != status {
+		r.Status = status
+		r.ResponseWriter.WriteHeader(r.Status)
+	}
+}
+
 func main() {
+	serverName := environmentOrDefault("LANDING_SERVER_NAME", DefaultServerName)
 	tmpl := environmentOrDefault("LANDING_TEMPLATE", "templates/index.html.tmpl")
-	title := environmentOrDefault("LANDING_TITLE", "go-landing")
+	title := environmentOrDefault("LANDING_TITLE", DefaultServerName)
 	description := environmentOrDefault("LANDING_DESCRIPTION", "powered by //go:embed")
-	links, err := parseLinks(strings.Split(environmentOrDefault("LANDING_LINKS", ""), ";"))
-	catchall := environmentOrDefault("LANDING_CATCHALL", "false")
-	notFound := environmentOrDefault("LANDING_NOTFOUND", "404 Not found")
+	links, err := parseLinks(trimEmpty(strings.Split(environmentOrDefault("LANDING_LINKS", ""), ";")))
+
+	catchall := environmentOrDefault("LANDING_CATCHALL_ENABLED", ConditionFalse)
+	notFoundMessage := environmentOrDefault("LANDING_NOTFOUND_MESSAGE", "404 Not found")
+	ping := environmentOrDefault("LANDING_PING_ENABLED", ConditionTrue)
+	pingMessage := environmentOrDefault("LANDING_PING_MESSAGE", "OK")
+	hostnames := trimEmpty(strings.Split(environmentOrDefault("LANDING_HOSTNAMES", ""), ";"))
+
+	hostnameMatchingEnabled := (len(hostnames) > 1 || (len(hostnames) == 1 && hostnames[0] != ""))
+	if hostnameMatchingEnabled {
+		log.Println("hostname matching enabled, allowed hostnames:", hostnames)
+	}
 
 	if err != nil {
 		log.Fatal(err)
@@ -70,35 +108,76 @@ func main() {
 		log.Fatal(err)
 	}
 
+	withGoLanding := func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			writer := &GoLandingWriter{
+				ResponseWriter: w,
+				Status:         200,
+			}
+			writer.Header().Add("X-Server", serverName)
+
+			hostname := strings.ReplaceAll(req.Host, ":9000", "")
+			if !strings.HasPrefix(req.URL.Path, "/static/") && hostnameMatchingEnabled {
+				match := false
+				for _, h := range hostnames {
+					if hostname == h {
+						match = true
+						break
+					}
+				}
+				if !match {
+					log.Println("request does not match allowed hostname(s), setting status code to 404")
+					writer.WriteHeader(404)
+				}
+			}
+
+			next.ServeHTTP(writer, req)
+			log.Println("serving response", hostname, req.URL.Path, writer.Status)
+		})
+	}
+
+	pingHandler := func() http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			w.Header().Add("Content-Type", "text/html")
+			w.Write([]byte(pingMessage))
+		})
+	}
+
+	defaultHandler := func() http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			title := title
+			links := links
+
+			var path = req.URL.Path
+			if path != "/" && catchall != ConditionTrue {
+				w.WriteHeader(404)
+				title = notFoundMessage
+				links = []Link{{Title: "Back to the startpage", Url: "/"}}
+			}
+			w.Header().Add("Content-Type", "text/html")
+
+			// respond with the output of template execution
+			t.Execute(w, struct {
+				Title       string
+				Description string
+				Links       []Link
+			}{Title: title, Description: description, Links: links})
+		})
+	}
+
 	var staticFS = http.FS(staticFiles)
 	fs := http.FileServer(staticFS)
 
-	http.Handle("/static/", fs)
+	mux := http.NewServeMux()
 
-	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		title := title
-		links := links
-
-		var path = req.URL.Path
-		if path != "/" && catchall != "true" {
-			w.WriteHeader(404)
-			title = notFound
-			links = []Link{{Title: "Back to the startpage", Url: "/"}}
-		}
-
-		log.Println("serving request ", path)
-		w.Header().Add("Content-Type", "text/html")
-
-		// respond with the output of template execution
-		t.Execute(w, struct {
-			Title       string
-			Description string
-			Links       []Link
-		}{Title: title, Description: description, Links: links})
-	})
+	if ping == ConditionTrue {
+		mux.Handle("/ping", withGoLanding(pingHandler()))
+	}
+	mux.Handle("/static/", withGoLanding(fs))
+	mux.Handle("/", withGoLanding(defaultHandler()))
 
 	log.Println("go-landing is listening on port 9000...")
-	err = http.ListenAndServe(":9000", nil)
+	err = http.ListenAndServe(":9000", mux)
 	if err != nil {
 		log.Fatal(err)
 	}

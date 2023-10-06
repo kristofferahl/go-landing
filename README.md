@@ -20,20 +20,25 @@ go run .
 
 ## Configuration
 
-| Environment variable | Description                                                   | Default                   |
-| -------------------- | ------------------------------------------------------------- | ------------------------- |
-| LANDING_TEMPLATE     | The path to the html template                                 | templates/index.html.tmpl |
-| LANDING_TITLE        | The title displayed on the landing page                       | go-landing                |
-| LANDING_DESCRIPTION  | The description displayed on the landing page                 | powered by //go:embed     |
-| LANDING_LINKS        | Markdown links to display on the landing page, separated by ; |                           |
-| LANDING_CATCHALL     | Catch all paths and display landing page                      | false                     |
-| LANDING_NOTFOUND     | Not found error message                                       | 404 Not found             |
+| Environment variable | Description | Default |
+| --- | --- | --- |
+| LANDING_TEMPLATE | The path to the html template | templates/index.html.tmpl |
+| LANDING_TITLE | The title displayed on the landing page | go-landing |
+| LANDING_DESCRIPTION | The description displayed on the landing page | powered by //go:embed |
+| LANDING_LINKS | Markdown links to display on the landing page, separated by ; |  |
+| LANDING_SERVER_NAME | The name of the server, as shown in the X-Server header | go-landing |
+| LANDING_CATCHALL_ENABLED | Catch all paths and display landing page | false |
+| LANDING_NOTFOUND_MESSAGE | Not found error message | 404 Not found |
+| LANDING_PING_ENABLED | Enable ping endpoint | true |
+| LANDING_PING_MESSAGE | Ping endpoint response message | OK |
+| LANDING_HOSTNAMES | When set, if the hostname does not match, a not found response will be given |  |
 
 ```bash
 export LANDING_TEMPLATE='templates/index.html.tmpl'
 export LANDING_TITLE='go-landing'
 export LANDING_DESCRIPTION='powered by //go:embed'
-export LANDING_LINKS='[Github](https://github.com/kristofferahl/go-landing);[Docher Hub](https://hub.docker.com/r/kristofferahl/go-landing)'
+export LANDING_LINKS='[Github](https://github.com/kristofferahl/go-landing);[Docker Hub](https://hub.docker.com/r/kristofferahl/go-landing)'
+export LANDING_PING_MESSAGE='HTTP OK - go-landing'
 ```
 
 ## Running in docker
