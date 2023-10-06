@@ -12,8 +12,13 @@ import (
 
 const (
 	DefaultServerName string = "go-landing"
-	ConditionTrue     string = "true"
-	ConditionFalse    string = "false"
+
+	ConditionTrue  string = "true"
+	ConditionFalse string = "false"
+
+	PathStatic string = "/static/"
+	PathPing   string = "/ping"
+	PathRoot   string = "/"
 )
 
 func environmentOrDefault(key string, defaultValue string) string {
@@ -108,7 +113,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	withGoLanding := func(next http.Handler) http.Handler {
+	withGoLanding := func(next http.Handler, tryMatchHostname bool) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			writer := &GoLandingWriter{
 				ResponseWriter: w,
@@ -117,7 +122,7 @@ func main() {
 			writer.Header().Add("X-Server", serverName)
 
 			hostname := strings.ReplaceAll(req.Host, ":9000", "")
-			if !strings.HasPrefix(req.URL.Path, "/static/") && hostnameMatchingEnabled {
+			if hostnameMatchingEnabled && tryMatchHostname {
 				match := false
 				for _, h := range hostnames {
 					if hostname == h {
@@ -149,10 +154,10 @@ func main() {
 			links := links
 
 			var path = req.URL.Path
-			if path != "/" && catchall != ConditionTrue {
+			if path != PathRoot && catchall != ConditionTrue {
 				w.WriteHeader(404)
 				title = notFoundMessage
-				links = []Link{{Title: "Back to the startpage", Url: "/"}}
+				links = []Link{{Title: "Back to the startpage", Url: PathRoot}}
 			}
 			w.Header().Add("Content-Type", "text/html")
 
@@ -171,10 +176,10 @@ func main() {
 	mux := http.NewServeMux()
 
 	if ping == ConditionTrue {
-		mux.Handle("/ping", withGoLanding(pingHandler()))
+		mux.Handle(PathPing, withGoLanding(pingHandler(), false))
 	}
-	mux.Handle("/static/", withGoLanding(fs))
-	mux.Handle("/", withGoLanding(defaultHandler()))
+	mux.Handle(PathStatic, withGoLanding(fs, false))
+	mux.Handle(PathRoot, withGoLanding(defaultHandler(), true))
 
 	log.Println("go-landing is listening on port 9000...")
 	err = http.ListenAndServe(":9000", mux)
